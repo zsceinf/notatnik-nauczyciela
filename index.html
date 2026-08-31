@@ -1,0 +1,1463 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#173B5E">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Notatnik nauczyciela</title>
+<div id="app"><div class="boot-screen"><div class="boot-mark">N</div><div><strong>Notatnik nauczyciela</strong><span>Uruchamianie aplikacji…</span></div></div></div>
+
+<style>
+  :root {
+    --paper: #E8ECF1;
+    --card: #FFFFFF;
+    --ink: #16212B;
+    --muted: #61738A;
+    --line: #CDD6E0;
+    --line-soft: #E2E8EF;
+    --accent: #1F4E79;
+    --ok: #2E6B4C;
+    --warn: #9A6B12;
+    --late: #97372A;
+    --num: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: var(--paper); }
+  body { min-height: 100dvh; }
+  button, input, textarea, summary { -webkit-tap-highlight-color: transparent; }
+  button { touch-action: manipulation; }
+  ::selection { background: #CFE0F1; color: var(--ink); }
+
+  #app {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    min-height: 100%;
+    font-size: 15px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 12px 64px; }
+
+  /* --- masthead --- */
+  .top {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--paper);
+    padding: 14px 0 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; padding: 0 2px 10px; }
+  .brand h1 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -0.015em; }
+  .brand span { font-size: 12px; color: var(--muted); font-family: var(--num); }
+
+  .tabs { display: flex; gap: 2px; }
+  .tab {
+    flex: 1; padding: 9px 4px; border: 0; background: transparent;
+    font: inherit; font-size: 14px; font-weight: 500; color: var(--muted);
+    cursor: pointer; border-bottom: 2px solid transparent;
+  }
+  .tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 620; }
+  .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .chips { display: flex; gap: 6px; margin: 12px 0 4px; }
+  .chip {
+    font: inherit; font-size: 13.5px; padding: 7px 12px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--card); color: var(--muted);
+    border-radius: 20px;
+  }
+  .chip span { font-family: var(--num); font-size: 11.5px; opacity: .7; margin-left: 2px; }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 560; }
+  .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* --- search --- */
+  .search {
+    width: 100%; margin: 12px 0 10px; padding: 9px 12px;
+    border: 1px solid var(--line); border-radius: 7px; background: var(--card);
+    font: inherit; font-size: 15px; color: var(--ink);
+  }
+  .search:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+
+  /* --- group rows --- */
+  .glist { display: flex; flex-direction: column; gap: 1px; background: var(--line-soft); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .grow {
+    display: grid; grid-template-columns: 78px 1fr auto; gap: 10px; align-items: center;
+    background: var(--card); border: 0; width: 100%; text-align: left;
+    padding: 11px 12px; font: inherit; color: inherit; cursor: pointer;
+  }
+  .grow:hover { background: #F7F9FB; }
+  .grow:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .code { font-family: var(--num); font-size: 13.5px; font-weight: 600; letter-spacing: -0.02em; }
+  .gmain { min-width: 0; }
+  .gtopic { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gtopic.empty { color: var(--muted); font-style: italic; }
+  .gmeta { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .flag { font-family: var(--num); font-size: 11.5px; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  .flag.late { background: #F6E5E2; color: var(--late); }
+  .flag.warn { background: #F6EEDC; color: var(--warn); }
+  .flag.ok { color: var(--muted); }
+
+  .subhead {
+    font-size: 12px; color: var(--muted); font-weight: 600;
+    margin: 18px 0 6px 2px; letter-spacing: 0.01em;
+  }
+
+  /* --- drift bars --- */
+  .prog { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+  .prog h3 { margin: 0 0 2px; font-size: 15px; font-weight: 620; }
+  .prog .cnt { font-size: 12px; color: var(--muted); font-family: var(--num); }
+  .bars { margin-top: 10px; display: flex; flex-direction: column; gap: 5px; }
+  .bar { display: grid; grid-template-columns: 62px 1fr 30px; gap: 8px; align-items: center; }
+  .bar .bcode { font-family: var(--num); font-size: 12px; }
+  .track { position: relative; height: 16px; }
+  .track::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 7.5px;
+    height: 1px; background: var(--line);
+  }
+  .dot {
+    position: absolute; top: 4px; width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent); transform: translateX(-4.5px);
+  }
+  .dot.late { background: var(--late); }
+  .bar .bpos { font-family: var(--num); font-size: 12px; color: var(--muted); text-align: right; }
+  .median { position: absolute; top: 1px; bottom: 1px; width: 1px; background: var(--muted); opacity: .45; }
+
+  .editlink { border: 0; background: none; font: inherit; font-size: 13px; color: var(--accent); cursor: pointer; padding: 6px 0 0; text-decoration: underline; }
+
+  /* --- sheet --- */
+  .scrim { position: fixed; inset: 0; background: rgba(22,33,43,.42); z-index: 40; }
+  .sheet {
+    position: fixed; z-index: 41; left: 0; right: 0; bottom: 0; top: 24px;
+    background: var(--paper); border-radius: 14px 14px 0 0;
+    display: flex; flex-direction: column; overflow: hidden;
+    box-shadow: 0 -2px 24px rgba(22,33,43,.2);
+  }
+  @media (min-width: 720px) {
+    .sheet { left: 50%; transform: translateX(-50%); width: 700px; top: 40px; bottom: 20px; border-radius: 14px; }
+  }
+  .shead {
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+    border-bottom: 1px solid var(--line); background: var(--card);
+  }
+  .shead h2 { margin: 0; font-size: 16px; font-weight: 650; font-family: var(--num); flex: 1; }
+  .shead .sub { font-size: 12px; color: var(--muted); font-family: ui-sans-serif, sans-serif; font-weight: 400; }
+  .sbody { flex: 1; overflow-y: auto; padding: 14px; }
+
+  .btn {
+    font: inherit; border: 1px solid var(--line); background: var(--card);
+    color: var(--ink); border-radius: 7px; padding: 8px 12px; cursor: pointer; font-size: 14px;
+  }
+  .btn:hover { background: #F7F9FB; }
+  .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 560; }
+  .btn.primary:hover { background: #1a4468; }
+  .btn.primary:disabled { background: var(--line); border-color: var(--line); color: var(--muted); cursor: default; }
+  .btn.wide { width: 100%; padding: 12px; text-align: left; }
+
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+  .panel h4 { margin: 0 0 8px; font-size: 13px; font-weight: 620; color: var(--muted); }
+
+  .nowtopic { font-size: 15px; margin-bottom: 10px; }
+  .nowtopic .n { font-family: var(--num); color: var(--muted); margin-right: 6px; }
+  .nexttopic { font-size: 13px; color: var(--muted); }
+
+  textarea, input[type="text"], input[type="number"], input[type="date"] {
+    width: 100%; font: inherit; font-size: 14px; padding: 8px 10px;
+    border: 1px solid var(--line); border-radius: 6px; background: #FCFDFE; color: var(--ink);
+  }
+  textarea:focus, input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row > input { flex: 1; }
+
+  /* --- student grid --- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr)); gap: 5px; margin-top: 8px; }
+  .cell {
+    aspect-ratio: 1; border: 1px solid var(--line); border-radius: 5px; background: var(--card);
+    font-family: var(--num); font-size: 13px; cursor: pointer; color: var(--muted); padding: 0;
+  }
+  .cell[data-s="1"] { background: #DDE7F1; border-color: #A9C1D8; color: var(--accent); font-weight: 600; }
+  .cell[data-s="2"] { background: #F6EEDC; border-color: #DCC48A; color: var(--warn); font-weight: 600; }
+  .cell[data-s="3"] { background: #DCEBE2; border-color: #9CC4AC; color: var(--ok); font-weight: 600; }
+  .cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .accs { display: flex; flex-direction: column; gap: 5px; }
+  .acc { display: grid; grid-template-columns: 26px 1fr 1fr; gap: 6px; align-items: center; }
+  .acc .anum {
+    font-family: var(--num); font-size: 12px; color: var(--muted);
+    text-align: right; padding-right: 2px;
+  }
+  .acc input { padding: 6px 8px; font-size: 13px; font-family: var(--num); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+
+  .task { border-top: 1px solid var(--line-soft); padding-top: 10px; margin-top: 10px; }
+  .task:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+  .thead { display: flex; align-items: baseline; gap: 8px; }
+  .thead strong { font-size: 14px; font-weight: 600; }
+  .thead .due { font-size: 12px; color: var(--muted); font-family: var(--num); }
+  .tally { font-size: 12px; color: var(--muted); font-family: var(--num); margin-top: 4px; }
+  .del { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 12px; text-decoration: underline; padding: 0; }
+
+  .note { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 11px 12px; margin-bottom: 8px; }
+  .note p { margin: 0; font-size: 14px; white-space: pre-wrap; }
+  .note .nm { font-size: 11.5px; color: var(--muted); font-family: var(--num); margin-top: 6px; display: flex; gap: 10px; }
+
+  .empty { color: var(--muted); font-size: 14px; padding: 20px 4px; text-align: center; }
+  .empty b { display: block; color: var(--ink); font-weight: 600; margin-bottom: 4px; }
+
+  .foot { margin-top: 26px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+  .foot button { border: 0; background: none; color: var(--late); font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; padding: 0; }
+
+  .saving { font-size: 11px; color: var(--muted); font-family: var(--num); }
+
+
+  /* --- online / auth / polish --- */
+  .boot-screen {
+    min-height: 100dvh; display: flex; align-items: center; justify-content: center; gap: 12px;
+    color: var(--ink); font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .boot-screen strong { display:block; font-size:15px; }
+  .boot-screen span { display:block; margin-top:2px; color:var(--muted); font-size:12px; }
+  .boot-mark, .login-mark {
+    display:grid; place-items:center; flex:0 0 auto; background:linear-gradient(145deg,#173B5E,#2B679C);
+    color:#fff; font-weight:750; box-shadow:0 10px 26px rgba(23,59,94,.18);
+  }
+  .boot-mark { width:38px; height:38px; border-radius:11px; font-size:18px; }
+
+  .login-page {
+    min-height:100dvh; display:grid; place-items:center; padding:24px 16px;
+    background:linear-gradient(180deg,#F3F6F9 0%,#E7EDF3 100%);
+  }
+  .login-shell { width:min(390px,100%); }
+  .login-brand { display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:16px; }
+  .login-mark { width:40px; height:40px; border-radius:12px; font-size:19px; }
+  .login-brand-copy strong { display:block; font-size:15px; letter-spacing:-.01em; }
+  .login-brand-copy span { display:none; }
+  .login-card {
+    background:#fff; border:1px solid var(--line); border-radius:18px; padding:26px 26px;
+    box-shadow:0 18px 52px rgba(27,50,70,.11),0 2px 6px rgba(27,50,70,.04); text-align:center;
+  }
+  .login-card h1 { margin:0 0 8px; font-size:24px; line-height:1.15; letter-spacing:-.03em; font-weight:720; }
+  .login-card .login-sub { margin:0 0 24px; color:var(--muted); font-size:13px; line-height:1.5; }
+  .login-account {
+    display:inline-flex; align-items:center; gap:7px; margin:0 0 20px; padding:7px 10px; border-radius:999px;
+    background:#F4F7FA; border:1px solid var(--line-soft); color:var(--ink); font-family:var(--num); font-size:11.5px;
+  }
+  .login-account i { width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px rgba(46,107,76,.09); }
+  .google-btn {
+    width:100%; min-height:48px; display:flex; align-items:center; justify-content:center; gap:11px;
+    border:1px solid #C9D3DE; border-radius:11px; background:#fff; color:#1F2933;
+    font:inherit; font-size:14px; font-weight:650; cursor:pointer; box-shadow:0 1px 2px rgba(22,33,43,.04);
+    transition:transform .12s ease,box-shadow .12s ease,border-color .12s ease,background .12s ease;
+  }
+  .google-btn:hover { background:#FAFBFC; border-color:#AEBCC9; box-shadow:0 5px 16px rgba(22,33,43,.08); transform:translateY(-1px); }
+  .google-btn:active { transform:translateY(0); box-shadow:none; }
+  .google-btn:focus-visible { outline:3px solid rgba(31,78,121,.22); outline-offset:2px; }
+  .google-g { width:18px; height:18px; display:block; }
+  .login-wait { min-height:48px; display:flex; align-items:center; justify-content:center; gap:9px; color:var(--muted); font-size:13px; }
+  .spinner { width:17px; height:17px; border:2px solid #D7E0E9; border-top-color:var(--accent); border-radius:50%; animation:spin .75s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .login-error { margin:0 0 16px; padding:10px 11px; border:1px solid #E7BBB4; border-radius:9px; background:#FFF5F3; color:#8C3027; font-size:12px; line-height:1.45; text-align:left; }
+  .login-meta { margin-top:18px; color:var(--muted); font-size:11px; line-height:1.45; }
+
+  .cloudline { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:center; }
+  .cloudok { color:var(--ok); font-weight:650; }
+  .clouderr { color:var(--late); font-weight:600; }
+  .status-dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--ok); margin-right:6px; vertical-align:1px; box-shadow:0 0 0 3px rgba(46,107,76,.09); }
+  .status-dot.offline { background:var(--warn); box-shadow:0 0 0 3px rgba(154,107,18,.09); }
+
+  /* delikatne dopracowanie głównego widoku */
+  .wrap { max-width: 860px; padding: 0 16px 72px; }
+  .top { padding-top:16px; background:rgba(232,236,241,.94); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
+  .brand { align-items:center; justify-content:space-between; gap:14px; padding-bottom:11px; }
+  .brand-main { min-width:0; }
+  .brand h1 { font-size:18px; }
+  .brand-meta { display:block; margin-top:2px; color:var(--muted); font-family:var(--num); font-size:11.5px; white-space:nowrap; }
+  .top-state { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:11.5px; white-space:nowrap; }
+  .tabs { gap:5px; }
+  .tab { border-radius:8px 8px 0 0; }
+  .tab:hover { background:rgba(255,255,255,.45); color:var(--ink); }
+  .glist, .prog, .panel, .note { box-shadow:0 1px 2px rgba(22,33,43,.025); }
+  .grow { min-height:59px; }
+  .btn { transition:background .12s ease,border-color .12s ease,transform .12s ease; }
+  .btn:active { transform:translateY(1px); }
+  .foot {
+    margin-top:32px; padding:15px 0 0; border-top:1px solid var(--line); font-size:12px; color:var(--muted);
+  }
+  .foot-main { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px 18px; align-items:center; }
+  .account-summary { min-width:0; }
+  .account-summary .email { margin-left:8px; color:var(--muted); overflow-wrap:anywhere; }
+  .save-summary { display:flex; align-items:center; gap:8px; }
+  .foot .saving { font-size:11.5px; }
+  .moretools { margin-top:11px; }
+  .moretools > summary {
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:var(--accent); font-size:12px; font-weight:600;
+    list-style:none; user-select:none; padding:3px 0;
+  }
+  .moretools > summary::-webkit-details-marker { display:none; }
+  .moretools > summary::after { content:'⌄'; font-size:13px; transition:transform .15s ease; }
+  .moretools[open] > summary::after { transform:rotate(180deg); }
+  .toolbox { margin-top:10px; padding:12px; border:1px solid var(--line); background:rgba(255,255,255,.6); border-radius:10px; }
+  .tool-actions { display:flex; flex-wrap:wrap; gap:7px; }
+  .foot .tool-actions .btn, .foot .tool-actions label.btn {
+    display:inline-flex; align-items:center; width:auto; border:1px solid var(--line); background:var(--card); color:var(--ink);
+    border-radius:7px; padding:7px 10px; text-decoration:none; font:inherit; font-size:12px; cursor:pointer;
+  }
+  .foot .tool-actions .btn:hover, .foot .tool-actions label.btn:hover { background:#F7F9FB; }
+  .danger-zone { margin-top:11px; padding-top:10px; border-top:1px solid var(--line-soft); }
+  .foot .danger-link { border:0; background:none; color:var(--late); text-decoration:underline; padding:0; font:inherit; font-size:11.5px; cursor:pointer; }
+  .privacy-note { margin-top:8px; font-size:11px; color:var(--muted); }
+
+  @media (max-width:720px) {
+    .login-page { padding:18px 12px; }
+    .login-card { padding:30px 22px 24px; border-radius:16px; }
+    .login-card h1 { font-size:22px; }
+    .brand { align-items:flex-start; }
+    .top-state { display:none; }
+    .grow { grid-template-columns:66px 1fr; }
+    .grow .flag { grid-column:2; justify-self:start; margin-top:-3px; }
+    .row { flex-wrap:wrap; }
+    .row > input { min-width:160px; }
+    .foot-main { display:block; }
+    .save-summary { margin-top:5px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; }
+  }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+(function () {
+  var KEY = 'notatnik-zsce-2627-v3-online';
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyBKlvvhmYS6E3r2E0QuqiCGgAaKuJOZ-gQ",
+    authDomain: "notatnik-nauczyciela.firebaseapp.com",
+    projectId: "notatnik-nauczyciela",
+    storageBucket: "notatnik-nauczyciela.firebasestorage.app",
+    messagingSenderId: "692175722654",
+    appId: "1:692175722654:web:4141d3aa6b485ca4b4c38f"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
+  var fs = firebase.firestore();
+  var ALLOWED_EMAIL = 'zsceinf@gmail.com';
+  var currentUser = null;
+  var stateRef = null;
+  var authError = '';
+
+
+  var PN_INF = 'Program nauczania: G. Koba, „Program nauczania. Teraz bajty. Informatyka dla szkoły ponadpodstawowej. Zakres podstawowy. Klasy I–III", Migra';
+  var PN_EO  = 'Program nauczania: U. Małek, S. Żmijewska-Kwiręg, „Masz wpływ". Program nauczania edukacji obywatelskiej dla liceum ogólnokształcącego i technikum, Nowa Era';
+
+  var PROGRAMS = [
+    { id: 'tb1', subj: 'inf', name: 'Informatyka — klasa 1 LO',
+      book: 'Podręcznik: G. Koba, „Teraz bajty" kl. I, Migra · 1042/1/2019', pn: PN_INF },
+    { id: 'tb1t', subj: 'inf', name: 'Informatyka — klasa 1 technikum (cykl 2-letni)',
+      book: 'Podręczniki: G. Koba, „Teraz bajty" kl. I (1042/1/2019) w I półroczu, kl. II (1042/2/2020) od II półrocza, Migra', pn: PN_INF },
+    { id: 'tb2', subj: 'inf', name: 'Informatyka — klasa 2 LO',
+      book: 'Podręcznik: G. Koba, „Teraz bajty" kl. II, Migra · 1042/2/2020', pn: PN_INF },
+    { id: 'tb2t', subj: 'inf', name: 'Informatyka — klasa 2 technikum (cykl 2-letni)',
+      book: 'Podręcznik: G. Koba, „Teraz bajty" kl. III, Migra · 1042/3/2021', pn: PN_INF },
+    { id: 'tb3', subj: 'inf', name: 'Informatyka — klasa 3 (LO i technikum)',
+      book: 'Podręcznik: G. Koba, „Teraz bajty" kl. III, Migra · 1042/3/2021', pn: PN_INF },
+    { id: 'eo1', subj: 'eo', name: 'Edukacja obywatelska — klasa 2',
+      book: 'Podręcznik: S. Drelich, R. Flis, M. Tragarz, M. Wojcieszak, S. Żmijewska-Kwiręg, „Masz wpływ" cz. 1, Nowa Era · 1236/1/2025', pn: PN_EO },
+    { id: 'eo2', subj: 'eo', name: 'Edukacja obywatelska — klasa 3',
+      book: 'Podręcznik: S. Drelich, R. Flis, M. Tragarz, E. Krawczyk, „Masz wpływ" cz. 2, Nowa Era · 1236/2/2026', pn: PN_EO }
+  ];
+
+  // [kod grupy, program, godziny tygodniowo]
+  var SEED = [
+    ['1A|2gr','tb1',1], ['1B|2gr','tb1',1], ['1C|2gr','tb1',1],
+    ['1D|2gr','tb1',1], ['1E|2gr','tb1',1], ['1F|2gr','tb1',1],
+    ['1Ta|1gr','tb1t',2], ['1Tb|1gr','tb1t',2],
+    ['2A|1gr','tb2',1], ['2B|1gr','tb2',1], ['2C|1gr','tb2',1], ['2D|2gr','tb2',1],
+    ['2E|2gr','tb2',1], ['2F|2gr','tb2',1], ['2G|1gr','tb2',1], ['2Tb|1gr','tb2t',1],
+    ['3A|2gr','tb3',1], ['3C|1gr','tb3',1], ['3D|1gr','tb3',1], ['3E|1gr','tb3',1],
+    ['3Ta|2gr','tb3',1], ['3Tb|2gr','tb3',1],
+    ['2Tb','eo1',1],
+    ['3C','eo2',1], ['3D','eo2',1], ['3Tb','eo2',1]
+  ];
+
+  var ORG_INF = "Lekcja organizacyjna – zapoznanie z PZO oraz przepisami BHP i regulaminem pracowni komputerowej";
+  var ORG_EO  = "Lekcja organizacyjna – zapoznanie z PZO";
+  function orgFor(id) { return id.indexOf('eo') === 0 ? ORG_EO : ORG_INF; }
+
+  // Rozkłady Migry (zawężona podstawa 2024, wersja z C++), wczytane z plików wydawnictwa.
+  var SEEDED_TOPICS = {
+    tb1: [
+      "A1 · Parametry komputera",
+      "A1 · Urządzenia peryferyjne",
+      "A2 · Systemy operacyjne i inne oprogramowanie",
+      "B1 · Nagłówek, stopka i standardowe style tekstu",
+      "B1 · Odwołania w dokumencie tekstowym – tworzenie spisu treści",
+      "B1 · Odwołania w dokumencie tekstowym – spis ilustracji, tabel i wykresów",
+      "B2 · Dzielenie dokumentu tekstowego",
+      "B2 · Praca w trybie recenzji",
+      "B2 · Praktyczny poradnik",
+      "B3 · Tworzenie obrazu i praca z warstwami w programie GIMP",
+      "B3 · Stosowanie narzędzi selekcji w programie GIMP",
+      "B3 · Edycja zdjęć w programie GIMP",
+      "B4 · Zasady tworzenia prezentacji multimedialnej",
+      "B4 · Tworzymy prezentację multimedialną o Fryderyku Chopinie",
+      "Sprawdzian (tematy B1-B4)",
+      "C1 · Sytuacje problemowe i określanie specyfikacji zadania",
+      "C1 · Języki programowania i programowanie",
+      "C2 · Środowisko programistyczne języka C++, stosowanie zmiennych i wyprowadzanie wyników",
+      "C2 · Zapisywanie rozwiązania problemu w języku C++",
+      "C2 · Tworzenie programów w języku C++ – zadania",
+      "C4 · Sytuacje warunkowe i algorytmy z warunkami w języku C++",
+      "C4 · Sprawdzanie poprawności danych",
+      "C4 · Algorytmy z warunkami zagnieżdżonymi",
+      "C5 · Algorytmy iteracyjne w języku C++",
+      "C5 · Zapisywanie rozwiązania problemu iteracyjnego w języku C++",
+      "C5 · Instrukcje iteracyjne zagnieżdżone",
+      "Sprawdzian (tematy C1-C2, C4-C5)",
+      "D1 · Internet jako ocean informacji",
+      "D1 · Przykłady wyszukiwania informacji",
+      "D2 · Korzystanie z wybranych e-usług",
+      "D3 · Zadania projektowe – przygotowanie projektu",
+      "D3 · Zadania projektowe – prezentacja projektu",
+    ],
+    tb1t: [
+      "A1 · Parametry komputera",
+      "A1 · Urządzenia peryferyjne",
+      "A2 · Systemy operacyjne i inne oprogramowanie",
+      "B1 · Nagłówek, stopka i standardowe style tekstu",
+      "B1 · Odwołania w dokumencie tekstowym – tworzenie spisu treści",
+      "B1 · Odwołania w dokumencie tekstowym – spis ilustracji, tabel i wykresów",
+      "B2 · Dzielenie dokumentu tekstowego",
+      "B2 · Praca w trybie recenzji",
+      "B2 · Praktyczny poradnik",
+      "B3 · Tworzenie obrazu i praca z warstwami w programie GIMP",
+      "B3 · Stosowanie narzędzi selekcji w programie GIMP",
+      "B3 · Edycja zdjęć w programie GIMP",
+      "B4 · Zasady tworzenia prezentacji multimedialnej",
+      "B4 · Tworzymy prezentację multimedialną o Fryderyku Chopinie",
+      "Sprawdzian (tematy B1-B4)",
+      "C1 · Sytuacje problemowe i określanie specyfikacji zadania",
+      "C1 · Języki programowania i programowanie",
+      "C2 · Środowisko programistyczne języka C++, stosowanie zmiennych i wyprowadzanie wyników",
+      "C2 · Zapisywanie rozwiązania problemu w języku C++",
+      "C2 · Tworzenie programów w języku C++ – zadania",
+      "C4 · Sytuacje warunkowe i algorytmy z warunkami w języku C++",
+      "C4 · Sprawdzanie poprawności danych",
+      "C4 · Algorytmy z warunkami zagnieżdżonymi",
+      "C5 · Algorytmy iteracyjne w języku C++",
+      "C5 · Zapisywanie rozwiązania problemu iteracyjnego w języku C++",
+      "C5 · Instrukcje iteracyjne zagnieżdżone",
+      "Sprawdzian (tematy C1-C2, C4-C5)",
+      "D1 · Internet jako ocean informacji",
+      "D1 · Przykłady wyszukiwania informacji",
+      "D2 · Korzystanie z wybranych e-usług",
+      "D3 · Zadania projektowe – przygotowanie projektu",
+      "D3 · Zadania projektowe – prezentacja projektu",
+      "A1 · Sieci komputerowe",
+      "A2 · Bezpieczeństwo i ochrona danych w komputerach i sieciach komputerowych",
+      "Sprawdzian (tematy A1-A2)",
+      "B1 · Tworzenie formuł, formaty danych i formatowanie tabeli arkusza kalkulacyjnego",
+      "B1 · Stosowanie funkcji arkusza kalkulacyjnego",
+      "B1 · Przedstawianie danych w postaci wykresu",
+      "B1 · Przykłady rozwiązywania problemów z wykorzystaniem myślenia komputacyjnego",
+      "B2 · Korzystanie z filtrów, tabele i wykresy przestawne",
+      "B2 · Stosowanie filtru w tabeli przestawnej i praktyczny poradnik",
+      "B3 · Tworzenie rysunków w grafice wektorowej",
+      "B3 · Rysowanie figur i ścieżek w programie Inkscape",
+      "B3 · Rysowanie przestrzenne, przekształcenia i warstwy w programie Inkscape",
+      "Sprawdzian (tematy B1-B3)",
+      "C1 · Stosowanie instrukcji iteracyjnej for w języku C++ – powtórzenie",
+      "C1 · Stosowanie instrukcji while w języku C++",
+      "C1 · Stosowanie instrukcji do … while w języku C++",
+      "C2 · Funkcje zwracające wartość w języku C++ z jednym parametrem",
+      "C2 · Funkcje zwracające wartość w języku C++ bez parametrów",
+      "C2 · Funkcje niezwracające wartości w języku C++",
+      "C3 · Deklarowanie i stosowanie tablicy w języku C++",
+      "C3 · Wykonywanie operacji na elementach tablicy w języku C++",
+      "C3 · Pisanie programów w języku C++ z wykorzystaniem tablic",
+      "C4 · Algorytm badania pierwszości liczby i obliczanie wartości elementów ciągu Fibonacciego",
+      "C4 · Porządkowanie metodą bąbelkową i przez wstawianie",
+      "Sprawdzian (tematy C1-C4)",
+      "D1 · Wybrane przepisy prawa dotyczące technologii informacyjno-komunikacyjnych",
+      "D2 · Komunikacja i wymiana informacji w Internecie",
+      "D3 · Zasady tworzenia stron internetowych",
+      "D3 · Tworzenie strony WWW w języku HTML",
+      "D3 · Stosowanie stylów do tworzenia stron WWW",
+      "D4 · Zadania projektowe",
+      "Sprawdzian (tematy D1-D4)",
+    ],
+    tb2: [
+      "A1 · Sieci komputerowe",
+      "A2 · Bezpieczeństwo i ochrona danych w komputerach i sieciach komputerowych",
+      "Sprawdzian (tematy A1-A2)",
+      "B1 · Tworzenie formuł, formaty danych i formatowanie tabeli arkusza kalkulacyjnego",
+      "B1 · Stosowanie funkcji arkusza kalkulacyjnego",
+      "B1 · Przedstawianie danych w postaci wykresu",
+      "B1 · Przykłady rozwiązywania problemów z wykorzystaniem myślenia komputacyjnego",
+      "B2 · Korzystanie z filtrów, tabele i wykresy przestawne",
+      "B2 · Stosowanie filtru w tabeli przestawnej i praktyczny poradnik",
+      "B3 · Tworzenie rysunków w grafice wektorowej",
+      "B3 · Rysowanie figur i ścieżek w programie Inkscape",
+      "B3 · Rysowanie przestrzenne, przekształcenia i warstwy w programie Inkscape",
+      "Sprawdzian (tematy B1-B3)",
+      "C1 · Stosowanie instrukcji iteracyjnej for w języku C++ – powtórzenie",
+      "C1 · Stosowanie instrukcji while w języku C++",
+      "C1 · Stosowanie instrukcji do … while w języku C++",
+      "C2 · Funkcje zwracające wartość w języku C++ z jednym parametrem",
+      "C2 · Funkcje zwracające wartość w języku C++ bez parametrów",
+      "C2 · Funkcje niezwracające wartości w języku C++",
+      "C3 · Deklarowanie i stosowanie tablicy w języku C++",
+      "C3 · Wykonywanie operacji na elementach tablicy w języku C++",
+      "C3 · Pisanie programów w języku C++ z wykorzystaniem tablic",
+      "C4 · Algorytm badania pierwszości liczby i obliczanie wartości elementów ciągu Fibonacciego",
+      "C4 · Porządkowanie metodą bąbelkową i przez wstawianie",
+      "Sprawdzian (tematy C1-C4)",
+      "D1 · Wybrane przepisy prawa dotyczące technologii informacyjno-komunikacyjnych",
+      "D2 · Komunikacja i wymiana informacji w Internecie",
+      "D3 · Zasady tworzenia stron internetowych",
+      "D3 · Tworzenie strony WWW w języku HTML",
+      "D3 · Stosowanie stylów do tworzenia stron WWW",
+      "D4 · Zadania projektowe",
+      "Sprawdzian (tematy D1-D4)",
+    ],
+    tb2t: [
+      "A1 · Logiczny model komputera i system dwójkowy",
+      "A1 · System szesnastkowy",
+      "A2 · Urządzenia cyfrowe w szkole",
+      "A2 · Urządzenia cyfrowe w domu i inne",
+      "B1 · Podstawowe pojęcia i przykład bazy danych – obsługa szkolnych zawodów pływackich",
+      "B1 · Tworzenie bazy danych – obsługa gabinetu stomatologicznego",
+      "B1 · Tworzenie bazy danych – zadania",
+      "B3 · Zasady tworzenia kwerend na przykładzie bazy Zawody",
+      "B3 · Importowanie danych i przygotowywanie kwerend w bazie Stomatolog",
+      "B3 · Przygotowywanie korespondencji seryjnej",
+      "B4 · Wybrane możliwości programu SketchUp przydatne do projektowania ogrodu",
+      "B4 · Projektowanie trójwymiarowego modelu ławki",
+      "B4 · Tworzenie projektu ogrodu",
+      "B4 · Projektowanie własnego pokoju",
+      "B4 · Doskonalenie umiejętności projektowania modeli trójwymiarowych – zadania",
+      "Sprawdzian (tematy B1-B4)",
+      "C1 · Wybrane algorytmy na tekstach",
+      "C1 · Praca z danymi tekstowymi w języku C++",
+      "C1 · Programowanie algorytmów na tekstach w języku C++ – porównywanie tekstów i zliczanie znaku w tekście",
+      "C1 · Programowanie algorytmów na tekstach w języku C++ – wyszukiwanie wzorca w tekście",
+      "C2 · Podstawowe pojęcia dotyczące szyfrowania i szyfrowanie tekstu metodą podstawieniową",
+      "C2 · Programowanie algorytmu szyfrowania podstawieniowego",
+      "C4 · Programowanie zamiany liczby dwójkowej na dziesiętną",
+      "C4 · Programowanie zamiany liczby dziesiętnej na dwójkową",
+      "C4 · Zamiana liczb między systemami pozycyjnymi",
+      "C4 · Działania na ułamkach z wykorzystaniem NWD i NWW",
+      "C4 · Skracanie i działania arytmetyczne na ułamkach",
+      "Sprawdzian (tematy C1-C4)",
+      "D1 · Projekt sterowania nawadnianiem ogrodu",
+      "D1 · Budowanie robota i inne zadania projektowe",
+      "D2 · Etapy tworzenia strony internetowej",
+      "D2 · Nowy wygląd strony internetowej o Wyspach Kanaryjskich",
+    ],
+    tb3: [
+      "A1 · Logiczny model komputera i system dwójkowy",
+      "A1 · System szesnastkowy",
+      "A2 · Urządzenia cyfrowe w szkole",
+      "A2 · Urządzenia cyfrowe w domu i inne",
+      "B1 · Podstawowe pojęcia i przykład bazy danych – obsługa szkolnych zawodów pływackich",
+      "B1 · Tworzenie bazy danych – obsługa gabinetu stomatologicznego",
+      "B1 · Tworzenie bazy danych – zadania",
+      "B3 · Zasady tworzenia kwerend na przykładzie bazy Zawody",
+      "B3 · Importowanie danych i przygotowywanie kwerend w bazie Stomatolog",
+      "B3 · Przygotowywanie korespondencji seryjnej",
+      "B4 · Wybrane możliwości programu SketchUp przydatne do projektowania ogrodu",
+      "B4 · Projektowanie trójwymiarowego modelu ławki",
+      "B4 · Tworzenie projektu ogrodu",
+      "B4 · Projektowanie własnego pokoju",
+      "B4 · Doskonalenie umiejętności projektowania modeli trójwymiarowych – zadania",
+      "Sprawdzian (tematy B1-B4)",
+      "C1 · Wybrane algorytmy na tekstach",
+      "C1 · Praca z danymi tekstowymi w języku C++",
+      "C1 · Programowanie algorytmów na tekstach w języku C++ – porównywanie tekstów i zliczanie znaku w tekście",
+      "C1 · Programowanie algorytmów na tekstach w języku C++ – wyszukiwanie wzorca w tekście",
+      "C2 · Podstawowe pojęcia dotyczące szyfrowania i szyfrowanie tekstu metodą podstawieniową",
+      "C2 · Programowanie algorytmu szyfrowania podstawieniowego",
+      "C4 · Programowanie zamiany liczby dwójkowej na dziesiętną",
+      "C4 · Programowanie zamiany liczby dziesiętnej na dwójkową",
+      "C4 · Zamiana liczb między systemami pozycyjnymi",
+      "C4 · Działania na ułamkach z wykorzystaniem NWD i NWW",
+      "C4 · Skracanie i działania arytmetyczne na ułamkach",
+      "Sprawdzian (tematy C1-C4)",
+      "D1 · Projekt sterowania nawadnianiem ogrodu",
+      "D1 · Budowanie robota i inne zadania projektowe",
+      "D2 · Etapy tworzenia strony internetowej",
+      "D2 · Nowy wygląd strony internetowej o Wyspach Kanaryjskich",
+    ],
+    eo1: [
+      "1.1 · Patriotyzm (1/2)",
+      "1.1 · Patriotyzm (2/2)",
+      "1.2 · Grupy społeczne i wspólnoty",
+      "1.3 · Relacje grupowe (1/2)",
+      "1.3 · Relacje grupowe (2/2)",
+      "1.4 · Współpraca i konflikty w grupie",
+      "1.5 · Współczesne społeczeństwo polskie (1/2)",
+      "1.5 · Współczesne społeczeństwo polskie (2/2)",
+      "2.1 · Zasady funkcjonowania szkoły (1/2)",
+      "2.1 · Zasady funkcjonowania szkoły (2/2)",
+      "2.2 · Społeczność szkolna (1/2)",
+      "2.2 · Społeczność szkolna (2/2)",
+      "2.3 · Samorząd uczniowski",
+      "3.1 · Społeczność lokalna",
+      "3.2 · Struktura i zadania samorządu terytorialnego",
+      "3.3 · Proces decyzyjny w samorządzie (1/2)",
+      "3.3 · Proces decyzyjny w samorządzie (2/2)",
+      "3.4 · Aktywność obywatelska w samorządach (1/2)",
+      "3.4 · Aktywność obywatelska w samorządach (2/2)",
+      "3.5 · Młodzież a samorząd (1/2)",
+      "3.5 · Młodzież a samorząd (2/2)",
+      "3.6 · Obywatel w urzędzie",
+      "4.1 · Demokracja – autorytaryzm – totalitaryzm",
+      "4.2 · Przemiany ustrojowe w Polsce po 1989 r.",
+      "4.3 · Demokratyczne państwo prawa",
+      "4.4 · Zagrożenia dla demokracji (1/2)",
+      "4.4 · Zagrożenia dla demokracji (2/2)",
+      "4.5 · Wybory demokratyczne",
+      "5.1 · Prawo i jego znaczenie",
+      "5.2 · Prawa człowieka",
+      "5.3 · Ochrona praw człowieka",
+      "5.4 · Ochrona danych osobowych i dóbr osobistych (fakultatywny)",
+      "5.5 · Formy zatrudnienia (1/2)",
+      "5.5 · Formy zatrudnienia (2/2)",
+      "6.1 · Sejm i Senat",
+      "6.2 · Proces legislacyjny",
+      "6.3 · Prezydent RP",
+      "6.4 · Rada Ministrów",
+      "6.5 · Władza sądownicza (1/2)",
+      "6.5 · Władza sądownicza (2/2)",
+      "6.6 · Trójpodział władzy",
+    ],
+    eo2: [
+      "1.1 · Partie polityczne",
+      "1.2 · Kampania wyborcza (1/2)",
+      "1.2 · Kampania wyborcza (2/2)",
+      "1.3 · Polityki publiczne",
+      "1.4 · Zasady życia publicznego",
+      "1.5 · Społeczeństwo obywatelskie",
+      "1.6 · Media masowe (1/2)",
+      "1.6 · Media masowe (2/2)",
+      "1.7 · Przekazy medialne",
+      "2.1 · Unia Europejska",
+      "2.2 · Przyszłość Unii Europejskiej (1/2)",
+      "2.2 · Przyszłość Unii Europejskiej (2/2)",
+      "2.3 · Polska w Unii Europejskiej (1/2)",
+      "2.3 · Polska w Unii Europejskiej (2/2)",
+      "2.4 · Programy unijne dla obywateli",
+      "3.1 · Polska w zglobalizowanym świecie (1/2)",
+      "3.1 · Polska w zglobalizowanym świecie (2/2)",
+      "3.2 · Bezpieczeństwo międzynarodowe (1/2)",
+      "3.2 · Bezpieczeństwo międzynarodowe (2/2)",
+      "3.3 · Problemy globalne (1/2)",
+      "3.3 · Problemy globalne (2/2)",
+      "3.4 · Gospodarka globalna (1/2)",
+      "3.4 · Gospodarka globalna (2/2)",
+      "3.5 · Kryzys klimatyczny (1/2)",
+      "3.5 · Kryzys klimatyczny (2/2)",
+    ]
+  };
+
+  function fresh() {
+    var groups = SEED.map(function (s) {
+      var whole = s[1].indexOf('eo') === 0;
+      return {
+        code: s[0], prog: s[1], h: s[2], whole: whole,
+        idx: 0, last: null, count: whole ? 30 : 16, note: '', tasks: []
+      };
+    });
+    var topics = {};
+    PROGRAMS.forEach(function (p) {
+      topics[p.id] = [orgFor(p.id)].concat(SEEDED_TOPICS[p.id] || []);
+    });
+    return { groups: groups, topics: topics, notes: [], v: 2 };
+  }
+
+  var db = fresh();
+  var tab = 'grupy';
+  var subj = 'inf';
+  var query = '';
+  var openCode = null;
+  var editProg = null;
+  var status = '';
+
+  // ---------- zapis online (Firebase) ----------
+  // Każdy użytkownik zapisuje wyłącznie we własnej ścieżce:
+  // users/{uid}/data/notatnik. Reguły Firestore muszą to egzekwować.
+  var timer = null;
+
+  function stripPasswords(d) {
+    // Wersja online celowo NIE zapisuje haseł uczniów/stanowisk do chmury.
+    // Zachowujemy loginy i pozostałe dane organizacyjne.
+    if (!d || !d.groups) return d;
+    d.groups.forEach(function (g) {
+      if (!g.acc) return;
+      Object.keys(g.acc).forEach(function (n) {
+        if (g.acc[n] && Object.prototype.hasOwnProperty.call(g.acc[n], 'p')) delete g.acc[n].p;
+      });
+    });
+    return d;
+  }
+
+  function safeClone(d) {
+    return stripPasswords(JSON.parse(JSON.stringify(d)));
+  }
+
+  function localKey() {
+    return KEY + (currentUser ? ':' + currentUser.uid : ':anonymous');
+  }
+
+  function readLocalRecord() {
+    try {
+      var raw = window.localStorage.getItem(localKey());
+      if (!raw) return null;
+      var x = JSON.parse(raw);
+      // v4: opakowanie z czasem zapisu; obsługa prostego obiektu na wypadek starszej wersji.
+      if (x && x.payload && x.payload.groups) return x;
+      if (x && x.groups) return { payload: x, updatedAt: 0 };
+    } catch (e) {}
+    return null;
+  }
+
+  function localSet(d, stamp) {
+    try {
+      window.localStorage.setItem(localKey(), JSON.stringify({
+        payload: safeClone(d),
+        updatedAt: stamp || Date.now()
+      }));
+    } catch (e) {}
+  }
+
+  function cloudPayload() {
+    return JSON.stringify(safeClone(db));
+  }
+
+  function setStatus(text) {
+    status = text;
+    paintStatus();
+  }
+
+  function save() {
+    clearTimeout(timer);
+    var stamp = Date.now();
+    setStatus(navigator.onLine === false ? 'offline — zapisano lokalnie' : 'zapisywanie…');
+    localSet(db, stamp); // natychmiastowa kopia awaryjna na tym komputerze
+    if (!stateRef || !currentUser || navigator.onLine === false) return;
+
+    timer = setTimeout(function () {
+      stateRef.set({
+        payload: cloudPayload(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        clientUpdatedAt: stamp,
+        version: 4
+      }, { merge: true }).then(function () {
+        var t = new Date();
+        setStatus('zapisano online ' + String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0'));
+      }).catch(function (e) {
+        console.error(e);
+        setStatus('nie zapisano online — kopia lokalna jest zachowana');
+      });
+    }, 250);
+  }
+
+  function paintStatus() {
+    var el = document.getElementById('save-status');
+    if (el) el.textContent = status;
+    var dot = document.getElementById('net-dot');
+    if (dot) dot.className = 'status-dot' + (navigator.onLine === false ? ' offline' : '');
+    var net = document.getElementById('net-label');
+    if (net) net.textContent = navigator.onLine === false ? 'Offline' : 'Online';
+  }
+
+  function migrate() {
+    db.groups.forEach(function (g) {              // uzupełnienie starszych zapisów
+      if (g.whole === undefined) {
+        g.whole = g.prog.indexOf('eo') === 0;
+        if (g.whole && g.count === 16) g.count = 30;
+      }
+      if (g.prog === 'tb1' && g.h === 2) g.prog = 'tb1t';
+      if (g.prog === 'tb2' && g.code === '2Tb|1gr') g.prog = 'tb2t';
+    });
+    db.topics = db.topics || {};
+    db.notes = db.notes || [];
+    PROGRAMS.forEach(function (p) {
+      if (!db.topics[p.id] || !db.topics[p.id].length) {
+        db.topics[p.id] = (SEEDED_TOPICS[p.id] || []).slice();
+      }
+      var first = db.topics[p.id][0] || '';
+      if (first.indexOf('Lekcja organizacyjna') === 0) {
+        db.topics[p.id][0] = orgFor(p.id);
+      } else {
+        db.topics[p.id].unshift(orgFor(p.id));
+        db.groups.forEach(function (g) {
+          if (g.prog === p.id && g.idx > 0) g.idx++;
+        });
+      }
+    });
+    stripPasswords(db);
+  }
+
+  function useLocalIfAvailable(message) {
+    var rec = readLocalRecord();
+    if (rec && rec.payload && rec.payload.groups) {
+      db = rec.payload; migrate();
+      status = message || 'tryb offline — wczytano kopię lokalną';
+      render();
+      return true;
+    }
+    return false;
+  }
+
+  function loadCloud() {
+    status = 'wczytywanie danych…';
+    stateRef = fs.collection('users').doc(currentUser.uid).collection('data').doc('notatnik');
+    var localRec = readLocalRecord();
+
+    return stateRef.get().then(function (snap) {
+      var data = snap.exists ? snap.data() : null;
+      var cloudStamp = data && data.clientUpdatedAt ? Number(data.clientUpdatedAt) : 0;
+
+      // Jeżeli ten komputer ma nowszy zapis (np. pracowano chwilę bez internetu),
+      // najpierw pokazujemy go i dosyłamy do chmury.
+      if (localRec && localRec.payload && localRec.payload.groups && localRec.updatedAt > cloudStamp) {
+        db = localRec.payload; migrate();
+        status = 'znaleziono nowszy zapis lokalny — synchronizuję…';
+        render();
+        save();
+        return;
+      }
+
+      if (data && data.payload) {
+        var d = JSON.parse(data.payload);
+        if (d && d.groups) { db = d; migrate(); localSet(db, cloudStamp || Date.now()); }
+        status = 'wczytano z chmury';
+        render();
+        return;
+      }
+
+      if (localRec && localRec.payload && localRec.payload.groups) {
+        db = localRec.payload; migrate();
+      }
+      status = 'pierwsze uruchomienie — tworzę zapis online…';
+      render();
+      save();
+    }).catch(function (e) {
+      console.error(e);
+      if (!useLocalIfAvailable('tryb offline — pracujesz na kopii lokalnej')) {
+        status = 'nie udało się odczytać danych z chmury';
+        render();
+      }
+    });
+  }
+
+  function googleIcon() {
+    return '<svg class="google-g" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.205c0-.638-.057-1.252-.164-1.841H9v3.482h4.844a4.14 4.14 0 0 1-1.797 2.715v2.258h2.909c1.703-1.568 2.684-3.878 2.684-6.614z"/><path fill="#34A853" d="M9 18c2.43 0 4.468-.806 5.956-2.181l-2.909-2.258c-.806.54-1.836.859-3.047.859-2.344 0-4.328-1.585-5.037-3.714H.956v2.332A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.963 10.706A5.41 5.41 0 0 1 3.682 9c0-.592.102-1.167.281-1.706V4.962H.956A9 9 0 0 0 0 9c0 1.452.347 2.826.956 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.322 0 2.508.455 3.441 1.346l2.581-2.581C13.464.892 11.426 0 9 0A9 9 0 0 0 .956 4.962l3.007 2.332C4.672 5.165 6.656 3.58 9 3.58z"/></svg>';
+  }
+
+  function renderLogin(waiting) {
+    var error = authError ? '<div class="login-error" role="alert">' + esc(authError) + '</div>' : '';
+    var action = waiting
+      ? '<div class="login-wait" role="status"><span class="spinner"></span><span>Sprawdzam sesję…</span></div>'
+      : '<button class="google-btn" id="login-google">' + googleIcon() + '<span>Zaloguj się przez Google</span></button>';
+
+    document.getElementById('app').innerHTML =
+      '<main class="login-page"><div class="login-shell">' +
+        '<div class="login-brand"><div class="login-mark">N</div><div class="login-brand-copy"><strong>Notatnik nauczyciela</strong></div></div>' +
+        '<section class="login-card" aria-label="Logowanie do notatnika">' +
+          error + action +
+        '</section>' +
+      '</div></main>';
+  }
+
+  function signIn() {
+    authError = '';
+    var provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account', login_hint: ALLOWED_EMAIL });
+    auth.signInWithPopup(provider).catch(function (e) {
+      console.error(e);
+      if (e.code === 'auth/unauthorized-domain') {
+        authError = 'Ta domena nie jest dodana do dozwolonych domen Firebase Authentication.';
+      } else if (e.code === 'auth/popup-blocked') {
+        authError = 'Przeglądarka zablokowała okno logowania. Zezwól na wyskakujące okna dla tej strony i spróbuj ponownie.';
+      } else if (e.code === 'auth/network-request-failed') {
+        authError = 'Brak połączenia z internetem. Sprawdź sieć i spróbuj ponownie.';
+      } else if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+        authError = '';
+      } else {
+        authError = 'Nie udało się zalogować przez Google. Spróbuj ponownie za chwilę.';
+      }
+      renderLogin(false);
+    });
+  }
+
+  function start() {
+    renderLogin(true);
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function () {});
+    auth.onAuthStateChanged(function (u) {
+      if (!u) {
+        currentUser = null; stateRef = null;
+        return renderLogin(false);
+      }
+      var email = String(u.email || '').toLowerCase();
+      if (email !== ALLOWED_EMAIL.toLowerCase()) {
+        currentUser = null; stateRef = null;
+        authError = 'To konto nie ma dostępu do notatnika.';
+        return auth.signOut().finally(function () { renderLogin(false); });
+      }
+      currentUser = u;
+      authError = '';
+      loadCloud();
+    });
+  }
+
+  // ---------- helpers ----------
+  function prog(id) {
+    for (var i = 0; i < PROGRAMS.length; i++) if (PROGRAMS[i].id === id) return PROGRAMS[i];
+    return null;
+  }
+  function group(code) {
+    for (var i = 0; i < db.groups.length; i++) if (db.groups[i].code === code) return db.groups[i];
+    return null;
+  }
+  function topicsOf(id) { return db.topics[id] || []; }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function today() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function dateFromYmd(s) {
+    var p = String(s || '').split('-');
+    return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]) : null;
+  }
+  function daysSince(d) {
+    if (!d) return null;
+    var then = dateFromYmd(d), now = dateFromYmd(today());
+    if (!then || !now) return null;
+    return Math.floor((now - then) / 86400000);
+  }
+  function median(arr) {
+    if (!arr.length) return 0;
+    var s = arr.slice().sort(function (a, b) { return a - b; });
+    var m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+  // Grupy z 2 godz./tydz. z założenia idą szybciej, więc porównujemy
+  // je tylko między sobą, a nie z grupami jednogodzinnymi.
+  function medianFor(pid, hours) {
+    return median(db.groups.filter(function (g) {
+      return g.prog === pid && g.h === hours;
+    }).map(function (g) { return g.idx; }));
+  }
+  function currentTopic(g) {
+    var t = topicsOf(g.prog);
+    return g.idx > 0 && t[g.idx - 1] ? t[g.idx - 1] : null;
+  }
+  function nextTopic(g) {
+    var t = topicsOf(g.prog);
+    return t[g.idx] || null;
+  }
+
+  // ---------- views ----------
+  function chips() {
+    var n = { inf: 0, eo: 0 };
+    db.groups.forEach(function (g) { n[prog(g.prog).subj]++; });
+    return '<div class="chips">' +
+      [['inf', 'Informatyka'], ['eo', 'Edukacja obywatelska']].map(function (c) {
+        return '<button class="chip" aria-pressed="' + (subj === c[0]) + '" data-subj="' + c[0] + '">' +
+               c[1] + ' <span>' + n[c[0]] + '</span></button>';
+      }).join('') + '</div>';
+  }
+
+  function viewGrupy() {
+    var q = query.trim().toLowerCase();
+    var list = db.groups.filter(function (g) {
+      if (prog(g.prog).subj !== subj) return false;
+      if (!q) return true;
+      return g.code.toLowerCase().indexOf(q) > -1 || prog(g.prog).name.toLowerCase().indexOf(q) > -1;
+    });
+
+    var h = chips() +
+      '<input class="search" id="q" placeholder="Szukaj grupy, np. 2D" value="' + esc(query) + '">';
+
+    if (!list.length) {
+      h += '<div class="empty"><b>Brak dopasowania</b>Wyczyść wyszukiwanie, żeby zobaczyć wszystkie grupy tego przedmiotu.</div>';
+      return h;
+    }
+
+    var byProg = {};
+    list.forEach(function (g) { (byProg[g.prog] = byProg[g.prog] || []).push(g); });
+
+    PROGRAMS.forEach(function (p) {
+      var gs = byProg[p.id];
+      if (!gs) return;
+      h += '<div class="subhead">' + esc(p.name) + '</div><div class="glist">';
+      gs.forEach(function (g) {
+        var med = medianFor(p.id, g.h);
+        var t = currentTopic(g);
+        var d = daysSince(g.last);
+        var flag = '<span class="flag ok">—</span>';
+        if (g.idx < med - 1) flag = '<span class="flag late">' + Math.round(med - g.idx) + ' tematy w tyle</span>';
+        else if (d !== null && d >= 14) flag = '<span class="flag warn">' + d + ' dni</span>';
+        else if (d !== null) flag = '<span class="flag ok">' + d + ' dni</span>';
+
+        h += '<button class="grow" data-open="' + esc(g.code) + '">' +
+             '<span class="code">' + esc(g.code) + '</span>' +
+             '<span class="gmain">' +
+               (t ? '<span class="gtopic">' + esc(g.idx + '. ' + t) + '</span>'
+                  : '<span class="gtopic empty">nic jeszcze nie zrealizowano</span>') +
+               '<span class="gmeta">' + (g.whole ? 'cała klasa' : 'grupa') + ', ' + g.count +
+               ' uczniów · ' + g.h + ' godz./tydz.</span>' +
+             '</span>' + flag + '</button>';
+      });
+      h += '</div>';
+    });
+    return h;
+  }
+
+  function viewRozklady() {
+    var h = chips();
+    PROGRAMS.filter(function (p) { return p.subj === subj; }).forEach(function (p) {
+      var gs = db.groups.filter(function (g) { return g.prog === p.id; });
+      var t = topicsOf(p.id);
+      h += '<div class="prog"><h3>' + esc(p.name) + '</h3>' +
+           '<div class="cnt">' + esc(p.book) + '</div>' +
+           '<div class="cnt">' + esc(p.pn) + '</div>' +
+           '<div class="cnt">' + (t.length ? t.length + ' tematów · ' + gs.length + ' grup' : 'rozkład jeszcze nie wpisany') + '</div>';
+
+      if (t.length) {
+        h += '<div class="bars">';
+        gs.forEach(function (g) {
+          var med = medianFor(p.id, g.h);
+          var pct = t.length ? (g.idx / t.length) * 100 : 0;
+          var mpct = t.length ? (med / t.length) * 100 : 0;
+          h += '<div class="bar"><span class="bcode">' + esc(g.code) + (g.h > 1 ? ' ·2h' : '') + '</span>' +
+               '<span class="track"><span class="median" style="left:' + mpct + '%"></span>' +
+               '<span class="dot' + (g.idx < med - 1 ? ' late' : '') + '" style="left:' + pct + '%"></span></span>' +
+               '<span class="bpos">' + g.idx + '</span></div>';
+        });
+        h += '</div>';
+      }
+      h += '<button class="editlink" data-prog="' + p.id + '">' +
+           (t.length ? 'Edytuj rozkład' : 'Wpisz rozkład materiału') + '</button></div>';
+    });
+    return h;
+  }
+
+  function viewNotatki() {
+    var h = '<div class="panel"><h4>Nowa notatka</h4>' +
+            '<textarea id="new-note" placeholder="Np. stanowisko 7 — nie działa port USB, zgłoszone 12.09"></textarea>' +
+            '<div class="row" style="margin-top:8px"><input type="text" id="note-tag" placeholder="Etykieta (pracownia, 2D, dostosowania…)">' +
+            '<button class="btn primary" id="add-note">Dodaj</button></div></div>';
+
+    if (!db.notes.length) {
+      h += '<div class="empty"><b>Pusto</b>Miejsce na sprzęt, hasła-wskazówki (nie hasła!), ustalenia z rodzicami, dostosowania po numerach.</div>';
+      return h;
+    }
+    db.notes.forEach(function (n, i) {
+      h += '<div class="note"><p>' + esc(n.text) + '</p><div class="nm">' +
+           '<span>' + esc(n.date) + '</span>' + (n.tag ? '<span>' + esc(n.tag) + '</span>' : '') +
+           '<button class="del" data-delnote="' + i + '">usuń</button></div></div>';
+    });
+    return h;
+  }
+
+  function viewSheet() {
+    if (editProg) return viewProgEditor();
+    if (!openCode) return '';
+    var g = group(openCode);
+    if (!g) return '';
+    var p = prog(g.prog);
+    var t = topicsOf(g.prog);
+    var nt = nextTopic(g), ct = currentTopic(g);
+
+    var h = '<div class="scrim" data-close="1"></div><div class="sheet" role="dialog" aria-label="Grupa ' + esc(g.code) + '">' +
+      '<div class="shead"><h2>' + esc(g.code) + '<span class="sub"> · ' + esc(p.name) + '</span></h2>' +
+      '<button class="btn" data-close="1">Zamknij</button></div><div class="sbody">';
+
+    // postęp
+    h += '<div class="panel"><h4>Postęp w rozkładzie</h4>';
+    if (!t.length) {
+      h += '<div class="nexttopic">Najpierw wpisz rozkład dla tego programu w zakładce Rozkłady.</div>';
+    } else {
+      h += '<div class="nowtopic">' + (ct
+        ? '<span class="n">' + g.idx + '.</span>' + esc(ct)
+        : '<span class="nexttopic">Jeszcze nic nie zrealizowano.</span>') + '</div>';
+      if (nt) {
+        h += '<button class="btn primary wide" id="advance">Zrealizowano dziś: <strong>' + esc((g.idx + 1) + '. ' + nt) + '</strong></button>';
+      } else {
+        h += '<div class="nexttopic">Rozkład zrealizowany w całości.</div>';
+      }
+      h += '<div class="row" style="margin-top:8px">' +
+           '<button class="btn" id="back" ' + (g.idx ? '' : 'disabled') + '>Cofnij o jeden</button>' +
+           '<span class="nexttopic">' + (g.last ? 'ostatnia lekcja: ' + esc(g.last) : 'brak zapisanej lekcji') + '</span></div>';
+    }
+    h += '</div>';
+
+    // zadania
+    h += '<div class="panel"><h4>' + (p.subj === 'eo' ? 'Prace i projekty' : 'Zadania praktyczne') + '</h4>';
+    if (!g.tasks.length) {
+      h += '<div class="nexttopic" style="margin-bottom:10px">Dodaj pozycję, a dostaniesz siatkę numerów do odklikiwania.</div>';
+    }
+    g.tasks.forEach(function (task, ti) {
+      var tally = [0, 0, 0, 0];
+      for (var i = 1; i <= g.count; i++) tally[task.s[i] || 0]++;
+      h += '<div class="task"><div class="thead"><strong>' + esc(task.name) + '</strong>' +
+           (task.due ? '<span class="due">do ' + esc(task.due) + '</span>' : '') +
+           '<span style="flex:1"></span><button class="del" data-deltask="' + ti + '">usuń</button></div>' +
+           '<div class="grid">';
+      for (var n = 1; n <= g.count; n++) {
+        h += '<button class="cell" data-task="' + ti + '" data-n="' + n + '" data-s="' + (task.s[n] || 0) + '">' + n + '</button>';
+      }
+      h += '</div><div class="tally">zaliczone ' + tally[3] + ' · poprawa ' + tally[2] + ' · oddane ' + tally[1] + ' · brak ' + tally[0] + '</div></div>';
+    });
+    h += '<div class="legend">' +
+         '<span><i style="background:#FFF;border:1px solid var(--line)"></i>brak</span>' +
+         '<span><i style="background:#DDE7F1"></i>oddane</span>' +
+         '<span><i style="background:#F6EEDC"></i>do poprawy</span>' +
+         '<span><i style="background:#DCEBE2"></i>zaliczone</span></div>';
+    h += '<div class="row" style="margin-top:12px"><input type="text" id="task-name" placeholder="Nazwa zadania">' +
+         '<input type="date" id="task-due" style="max-width:150px">' +
+         '<button class="btn primary" id="add-task">Dodaj</button></div></div>';
+
+    // konta w pracowni — tylko informatyka
+    if (p.subj === 'inf') {
+      g.acc = g.acc || {};
+      h += '<div class="panel"><h4>Loginy w pracowni</h4>' +
+           '<div class="row" style="margin-bottom:10px">' +
+           '<input type="text" id="acc-pattern" placeholder="Wzór loginu, np. uczen{nr}" value="' + esc(g.pattern || '') + '">' +
+           '<button class="btn" id="acc-fill">Wypełnij</button></div>' +
+           '<div class="accs">';
+      for (var s = 1; s <= g.count; s++) {
+        var a = g.acc[s] || {};
+        h += '<div class="acc" style="grid-template-columns:26px 1fr"><span class="anum">' + s + '</span>' +
+             '<input type="text" data-acc="l" data-n="' + s + '" placeholder="login" value="' + esc(a.l || '') + '"></div>';
+      }
+      h += '</div><div class="legend">Wersja online zapisuje loginy, ale celowo nie przechowuje haseł uczniów w chmurze.</div></div>';
+    }
+
+    // ustawienia + notatka
+    h += '<div class="panel"><h4>Notatka o grupie</h4>' +
+         '<textarea id="gnote" placeholder="Dostosowania po numerach, układ stanowisk, ustalenia…">' + esc(g.note) + '</textarea>' +
+         '<div class="row" style="margin-top:10px"><span class="nexttopic">Uczniów ' +
+         (g.whole ? 'w klasie' : 'w grupie') + '</span>' +
+         '<input type="number" id="gcount" min="1" max="40" value="' + g.count + '" style="max-width:80px"></div></div>';
+
+    h += '</div></div>';
+    return h;
+  }
+
+  function viewProgEditor() {
+    var p = prog(editProg);
+    var t = topicsOf(editProg);
+    return '<div class="scrim" data-close="1"></div><div class="sheet" role="dialog" aria-label="Rozkład">' +
+      '<div class="shead"><h2 style="font-family:inherit;font-size:15px">' + esc(p.name) + '</h2>' +
+      '<button class="btn" data-close="1">Zamknij</button></div><div class="sbody">' +
+
+      '<div class="panel"><h4>Wczytaj plik od wydawnictwa</h4>' +
+      '<div class="nexttopic" style="margin-bottom:4px">' + esc(p.book) + '</div>' +
+      '<div class="nexttopic" style="margin-bottom:8px">' + esc(p.pn) + '</div>' +
+      '<input type="file" id="file" accept=".rtf,.txt,.csv,.tsv,.docx" style="font-size:13px">' +
+      '<div class="nexttopic" style="margin-top:8px">RTF, DOCX, TXT lub CSV. Tematy trafią do pola niżej — przejrzyj je przed zapisaniem.</div>' +
+      '<div id="fmsg" class="nexttopic" style="margin-top:6px"></div></div>' +
+
+      '<div class="panel"><h4>Tematy, jeden w wierszu</h4>' +
+      '<textarea id="topics" style="min-height:280px" placeholder="Wklej rozkład materiału albo wczytaj plik wyżej.">' +
+      esc(t.join('\n')) + '</textarea>' +
+      '<div class="row" style="margin-top:10px"><button class="btn primary" id="save-topics">Zapisz rozkład</button>' +
+      '<button class="btn" id="clean">Uporządkuj wklejone</button></div>' +
+      '<div class="nexttopic" style="margin-top:8px">„Uporządkuj" usuwa numerację, nagłówki tabeli i kolumny z godzinami, jeśli wkleiłeś tabelę z Worda.</div>' +
+      '</div></div></div>';
+  }
+
+  // ---------- import ----------
+  var CP1250 = {
+    0xB9: 'ą', 0xE6: 'ć', 0xEA: 'ę', 0xB3: 'ł', 0xF1: 'ń', 0xF3: 'ó',
+    0x9C: 'ś', 0x9F: 'ź', 0xBF: 'ż', 0xA5: 'Ą', 0xC6: 'Ć', 0xCA: 'Ę',
+    0xA3: 'Ł', 0xD1: 'Ń', 0xD3: 'Ó', 0x8C: 'Ś', 0x8F: 'Ź', 0xAF: 'Ż',
+    0x93: '„', 0x94: '”', 0x96: '–', 0x97: '—', 0x85: '…'
+  };
+
+  function fromRtf(src) {
+    var s = src
+      .replace(/\{\\\*[^{}]*\}/g, ' ')
+      .replace(/\{\\(fonttbl|colortbl|stylesheet|info|listtable|listoverridetable)[\s\S]*?\}\s*\}/gi, ' ')
+      .replace(/\\par[d]?\b/g, '\n')
+      .replace(/\\line\b/g, '\n')
+      .replace(/\\(cell|tab|intbl)\b/g, '\t')
+      .replace(/\\row\b/g, '\n')
+      .replace(/\\u(-?\d+)\s?\??/g, function (m, n) {
+        n = +n; if (n < 0) n += 65536;
+        return String.fromCharCode(n);
+      })
+      .replace(/\\'([0-9a-fA-F]{2})/g, function (m, hx) {
+        var b = parseInt(hx, 16);
+        return CP1250[b] || (b < 128 ? String.fromCharCode(b) : '');
+      })
+      .replace(/\\[a-zA-Z]+-?\d*\s?/g, ' ')
+      .replace(/[{}]/g, ' ');
+    return s;
+  }
+
+  var HEADERS = /^(l\.?p\.?|nr|temat(y)?( lekcji)?|liczba godzin|godz(iny)?|liczba|uwagi|wymagania|osiągnięcia|podstawa programowa|termin|miesiąc|numer|razem|semestr|półrocze|treści nauczania|cele)$/i;
+
+  function cleanLines(text) {
+    var out = [], prev = '';
+    text.split(/\r?\n/).forEach(function (raw) {
+      var line = raw.replace(/\u00a0/g, ' ').trim();
+      if (!line) return;
+
+      if (line.indexOf('\t') > -1) {                    // wiersz tabeli — bierzemy najdłuższą komórkę
+        var cells = line.split('\t').map(function (c) { return c.trim(); })
+          .filter(function (c) { return c && !/^\d+([.,]\d+)?$/.test(c); });
+        if (!cells.length) return;
+        cells.sort(function (a, b) { return b.length - a.length; });
+        line = cells[0];
+      }
+
+      line = line.replace(/^\d+[.)]\s+/, '').replace(/\s+/g, ' ').trim();
+      if (line.length < 4) return;
+      if (HEADERS.test(line)) return;
+      if (/^[\d\s.,;:\-–—/]+$/.test(line)) return;
+      if (line === prev) return;
+      prev = line;
+      out.push(line);
+    });
+    return out;
+  }
+
+  function loadFile(file) {
+    var msg = document.getElementById('fmsg');
+    var name = file.name.toLowerCase();
+
+    function put(text) {
+      var lines = cleanLines(text);
+      if (!lines.length) {
+        msg.textContent = 'Nie znalazłem tematów w tym pliku. Otwórz go i skopiuj kolumnę z tematami do pola niżej.';
+        return;
+      }
+      document.getElementById('topics').value = lines.join('\n');
+      msg.textContent = 'Wczytano ' + lines.length + ' pozycji. Sprawdź i popraw, potem zapisz.';
+    }
+
+    if (name.slice(-5) === '.docx') {
+      msg.textContent = 'Wczytywanie pliku Word…';
+      var go = function () {
+        file.arrayBuffer().then(function (buf) {
+          window.mammoth.extractRawText({ arrayBuffer: buf })
+            .then(function (r) { put(r.value); })
+            .catch(function () { msg.textContent = 'Nie udało się odczytać tego DOCX. Zapisz go jako TXT albo skopiuj tematy ręcznie.'; });
+        });
+      };
+      if (window.mammoth) return go();
+      var sc = document.createElement('script');
+      sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+      sc.onload = go;
+      sc.onerror = function () { msg.textContent = 'Brak połączenia z biblioteką do DOCX. Zapisz plik jako TXT albo RTF.'; };
+      document.head.appendChild(sc);
+      return;
+    }
+
+    var fr = new FileReader();
+    fr.onload = function () {
+      var txt = String(fr.result);
+      put(name.slice(-4) === '.rtf' || txt.slice(0, 5) === '{\\rtf' ? fromRtf(txt) : txt);
+    };
+    fr.onerror = function () { msg.textContent = 'Nie udało się otworzyć pliku.'; };
+    fr.readAsText(file, name.slice(-4) === '.rtf' ? 'windows-1250' : 'utf-8');
+  }
+
+  // ---------- render ----------
+  function render() {
+    var body =
+      tab === 'grupy' ? viewGrupy() :
+      tab === 'rozklady' ? viewRozklady() : viewNotatki();
+
+    var net = navigator.onLine === false ? 'Offline' : 'Online';
+
+    document.getElementById('app').innerHTML =
+      '<div class="wrap"><div class="top"><div class="brand">' +
+        '<div class="brand-main"><h1>Notatnik nauczyciela</h1><span class="brand-meta">2026/2027 · 28 godz. · 26 grup</span></div>' +
+        '<div class="top-state"><span id="net-dot" class="status-dot' + (navigator.onLine === false ? ' offline' : '') + '"></span><span id="net-label">' + net + '</span></div>' +
+      '</div><div class="tabs" role="tablist">' +
+      ['grupy:Grupy', 'rozklady:Rozkłady', 'notatki:Notatki'].map(function (x) {
+        var k = x.split(':');
+        return '<button class="tab" role="tab" aria-selected="' + (tab === k[0]) + '" data-tab="' + k[0] + '">' + k[1] + '</button>';
+      }).join('') + '</div></div>' + body +
+      '<footer class="foot">' +
+        '<div class="foot-main">' +
+          '<div class="account-summary"><span class="cloudok"><span class="status-dot' + (navigator.onLine === false ? ' offline' : '') + '"></span>' + net + '</span></div>' +
+          '<div class="save-summary"><span aria-hidden="true">✓</span><span id="save-status" class="saving">' + esc(status) + '</span></div>' +
+        '</div>' +
+        '<details class="moretools"><summary>Więcej opcji</summary><div class="toolbox">' +
+          '<div class="tool-actions">' +
+            '<button class="btn" id="export">Kopia zapasowa</button>' +
+            '<label class="btn">Przywróć kopię<input type="file" id="import" accept=".json" style="display:none"></label>' +
+            '<button class="btn" id="logout">Wyloguj</button>' +
+          '</div>' +
+          '<div class="privacy-note">Kopia zapasowa zawiera dane organizacyjne notatnika, ale nie zawiera haseł uczniów.</div>' +
+          '<div class="danger-zone"><button class="danger-link" id="reset">Wyczyść dane notatnika…</button></div>' +
+        '</div></details>' +
+      '</footer></div>' + viewSheet();
+
+    var q = document.getElementById('q');
+    if (q && query) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  }
+
+  // ---------- events ----------
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-tab],[data-subj],[data-open],[data-close],[data-prog],[data-task],[data-deltask],[data-delnote],#advance,#back,#add-task,#add-note,#save-topics,#clean,#acc-fill,#export,#reset,#logout,#login-google');
+    if (!el) return;
+
+    if (el.dataset.tab) { tab = el.dataset.tab; query = ''; return render(); }
+    if (el.dataset.subj) { subj = el.dataset.subj; query = ''; return render(); }
+    if (el.dataset.close) { openCode = null; editProg = null; return render(); }
+    if (el.dataset.open) { openCode = el.dataset.open; return render(); }
+    if (el.dataset.prog) { editProg = el.dataset.prog; return render(); }
+
+    var g = openCode ? group(openCode) : null;
+
+    if (el.id === 'advance' && g) {
+      g.idx++; g.last = today(); save(); return render();
+    }
+    if (el.id === 'back' && g && g.idx > 0) {
+      g.idx--; save(); return render();
+    }
+    if (el.dataset.task !== undefined && g) {
+      var task = g.tasks[+el.dataset.task];
+      var n = +el.dataset.n;
+      task.s[n] = ((task.s[n] || 0) + 1) % 4;
+      el.dataset.s = task.s[n];
+      save();
+      return;
+    }
+    if (el.dataset.deltask !== undefined && g) {
+      g.tasks.splice(+el.dataset.deltask, 1); save(); return render();
+    }
+    if (el.id === 'add-task' && g) {
+      var nm = document.getElementById('task-name').value.trim();
+      if (!nm) return;
+      g.tasks.unshift({ name: nm, due: document.getElementById('task-due').value, s: {} });
+      save(); return render();
+    }
+    if (el.id === 'add-note') {
+      var tx = document.getElementById('new-note').value.trim();
+      if (!tx) return;
+      db.notes.unshift({ text: tx, tag: document.getElementById('note-tag').value.trim(), date: today() });
+      save(); return render();
+    }
+    if (el.dataset.delnote !== undefined) {
+      db.notes.splice(+el.dataset.delnote, 1); save(); return render();
+    }
+    if (el.id === 'acc-fill' && g) {
+      var pat = document.getElementById('acc-pattern').value.trim();
+      if (!pat) return;
+      g.pattern = pat;
+      g.acc = g.acc || {};
+      for (var s = 1; s <= g.count; s++) {
+        g.acc[s] = g.acc[s] || {};
+        if (!g.acc[s].l) {
+          g.acc[s].l = pat.replace(/\{nr2\}/g, s < 10 ? '0' + s : String(s))
+                          .replace(/\{nr\}/g, String(s));
+        }
+      }
+      save(); return render();
+    }
+    if (el.id === 'clean') {
+      var ta = document.getElementById('topics');
+      ta.value = cleanLines(ta.value).join('\n');
+      return;
+    }
+    if (el.id === 'clean-noop') { return; }
+    if (el.id === 'save-topics') {
+      db.topics[editProg] = document.getElementById('topics').value
+        .split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+      editProg = null; save(); return render();
+    }
+    if (el.id === 'login-google') { return signIn(); }
+    if (el.id === 'logout') { return auth.signOut(); }
+    if (el.id === 'export') {
+      var blob = new Blob([JSON.stringify(safeClone(db), null, 1)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'notatnik-kopia-' + today() + '.json';
+      a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+      return;
+    }
+    if (el.id === 'reset') {
+      var answer = prompt('To usunie postęp lekcji, zadania, notatki i własne zmiany rozkładów z chmury.\n\nAby potwierdzić, wpisz: USUŃ');
+      if (answer === 'USUŃ') {
+        db = fresh(); save(); return render();
+      }
+    }
+  });
+
+  document.addEventListener('input', function (e) {
+    if (e.target.dataset && e.target.dataset.acc) {
+      var g = openCode ? group(openCode) : null;
+      if (!g) return;
+      var n = e.target.dataset.n;
+      g.acc = g.acc || {};
+      g.acc[n] = g.acc[n] || {};
+      g.acc[n][e.target.dataset.acc] = e.target.value;
+      return save();                       // bez render(), żeby nie wyrzucało kursora z pola
+    }
+    if (e.target.id === 'q') { query = e.target.value; return render(); }
+  });
+
+  document.addEventListener('change', function (e) {
+    if (e.target.id === 'import' && e.target.files && e.target.files[0]) {
+      var fr = new FileReader();
+      fr.onload = function () {
+        try {
+          var d = JSON.parse(String(fr.result));
+          if (!d || !d.groups) throw 0;
+          if (confirm('Przywrócić tę kopię? Obecny stan notatnika online zostanie zastąpiony zawartością pliku.')) {
+            db = d; migrate(); save(); render();
+          }
+        } catch (err) { alert('To nie wygląda na kopię notatnika.'); }
+      };
+      fr.readAsText(e.target.files[0], 'utf-8');
+      return;
+    }
+    if (e.target.id === 'file' && e.target.files && e.target.files[0]) {
+      return loadFile(e.target.files[0]);
+    }
+    var g = openCode ? group(openCode) : null;
+    if (!g) return;
+    if (e.target.id === 'gnote') { g.note = e.target.value; save(); }
+    if (e.target.id === 'gcount') {
+      var v = Math.max(1, Math.min(40, +e.target.value || 16));
+      g.count = v; save(); render();
+    }
+  });
+
+  window.addEventListener('online', function () {
+    paintStatus();
+    if (currentUser && stateRef) {
+      status = 'internet wrócił — synchronizuję…';
+      save();
+    }
+  });
+  window.addEventListener('offline', function () {
+    status = 'offline — zmiany zostaną zachowane lokalnie';
+    paintStatus();
+  });
+
+  start();
+})();
+</script>
